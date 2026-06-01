@@ -1,15 +1,55 @@
-import React from 'react';
-import { ShoppingCart, Gift } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShoppingCart, Gift, CheckSquare, Square } from 'lucide-react';
 
 export default function PackageCard({ pkg, onAddPackageToCart }) {
+  // প্রিমিয়াম প্যাকেজের প্রথম ৫টি আইটেম ডিফল্ট সিলেক্টেড রাখার জন্য
+  const isPremium = pkg.selectNote;
+  const defaultSelected = pkg.items && pkg.items.length > 5 ? pkg.items.slice(0, 5) : (pkg.items || []);
   
+  const [selectedAttars, setSelectedAttars] = useState(defaultSelected);
+  const [customText, setCustomText] = useState(''); // কাস্টম প্যাকেজের টেক্সট ট্র্যাক করার জন্য
+
+  // প্রিমিয়াম প্যাকেজের চেকবক্স টগল লজিক
+  const handleToggleAttar = (item) => {
+    if (selectedAttars.includes(item)) {
+      setSelectedAttars(selectedAttars.filter(i => i !== item));
+    } else {
+      if (selectedAttars.length >= 5) {
+        alert('ভাই, এই প্যাকেজে সর্বোচ্চ ৫টি আতর সিলেক্ট করতে পারবেন।');
+        return;
+      }
+      setSelectedAttars([...selectedAttars, item]);
+    }
+  };
+
   const handleAddPackageClick = () => {
+    // ১. প্রিমিয়াম প্যাকেজের ক্ষেত্রে ৫টি সিলেক্ট না থাকলে রেস্ট্রিকশন
+    if (isPremium && selectedAttars.length !== 5) {
+      alert(`ভাই, দয়া করে যেকোনো ৫টি আতর সিলেক্ট করুন। আপনি এখন ${selectedAttars.length}টি সিলেক্ট করেছেন।`);
+      return;
+    }
+
+    // ২. কাস্টমাইজড প্যাকেজের ক্ষেত্রে কিছু না লিখলে অ্যালার্ট
+    if (pkg.isCustom && !customText.trim()) {
+      alert('ভাই, আপনার কাস্টমাইজড প্যাকেজে কোন কোন আতর নিতে চান, তা নিচের বক্সে লিখে দিন।');
+      return;
+    }
+
     if (onAddPackageToCart) {
+      let detailsString = 'Combo Set';
+      if (isPremium) {
+        detailsString = `Premium 5 Items (${selectedAttars.join(', ')})`;
+      } else if (pkg.isCustom) {
+        detailsString = `Custom Order: ${customText.trim()}`;
+      } else if (pkg.items) {
+        detailsString = `Regular 5 Items (${pkg.items.join(', ')})`;
+      }
+
       onAddPackageToCart({
         id: pkg.id,
         name: pkg.name,
         finalPrice: pkg.price,
-        selectedSize: 'Combo Set',
+        selectedSize: detailsString,
         image: pkg.image,
         isCombo: true
       });
@@ -51,22 +91,62 @@ export default function PackageCard({ pkg, onAddPackageToCart }) {
           </div>
         )}
 
-        {/* Included Attars Checklist Box */}
+        {/* 🌟 ডাইনামিক কন্টেন্ট বক্স: প্যাকেজের টাইপ অনুযায়ী ভেতরে চেঞ্জ হবে */}
         <div className="bg-zinc-50 border border-gray-100 rounded-xl p-4 text-left">
-          <ul className="space-y-2 text-xs text-zinc-700 font-medium">
-            {pkg.items && pkg.items.map((item, idx) => (
-              <li key={idx} className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0"></span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
+          {pkg.isCustom ? (
+            // ক. কাস্টমাইজড প্যাকেজ হলে সুন্দর একটা নোট ও ইনপুট বক্স দেখাবে
+            <div className="space-y-2.5">
+              <label className="text-[10px] uppercase tracking-wider font-extrabold text-zinc-500 block">
+                Write Your Chosen Attars
+              </label>
+              <textarea
+                value={customText}
+                onChange={(e) => setCustomText(e.target.value)}
+                rows="3"
+                placeholder="আপনার পছন্দের আতরগুলোর নাম এখানে কমা (,) দিয়ে লিখুন... (যেমন: Armani, Cool Water)"
+                className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-medium resize-none shadow-3xs"
+              />
+            </div>
+          ) : (
+            // খ. রেগুলার অথবা প্রিমিয়াম প্যাকেজ হলে লিস্ট দেখাবে
+            <ul className="space-y-2.5 text-xs text-zinc-700 font-medium">
+              {pkg.items && pkg.items.map((item, idx) => {
+                const isSelected = selectedAttars.includes(item);
 
-          {/* 🌟 ৩ নম্বর ইস্যু: প্রিমিয়াম প্যাকেজের ৬টা আইটেম হলে নিচে এই স্পেশাল নোটটি দেখাবে */}
-          {pkg.selectNote && (
-            <div className="mt-3 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-2 text-center">
+                return (
+                  <li 
+                    key={idx} 
+                    onClick={() => isPremium && handleToggleAttar(item)}
+                    className={`flex items-center gap-2.5 p-0.5 rounded-lg transition-all ${
+                      isPremium ? 'cursor-pointer hover:bg-gray-200/70 select-none' : ''
+                    }`}
+                  >
+                    {isPremium ? (
+                      // প্রিমিয়াম প্যাকেজের জন্য চেকবক্স
+                      isSelected ? (
+                        <CheckSquare className="w-4 h-4 text-emerald-700 shrink-0" />
+                      ) : (
+                        <Square className="w-4 h-4 text-gray-300 shrink-0" />
+                      )
+                    ) : (
+                      // রেগুলার প্যাকেজের জন্য ফিক্সড ডট
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0" />
+                    )}
+                    
+                    <span className={isPremium && isSelected ? "font-bold text-emerald-900" : "text-zinc-700"}>
+                      {item}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
+          {/* প্রিমিয়াম প্যাকেজের ইন্ডিকেটর নোট */}
+          {isPremium && (
+            <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-2 text-center">
               <p className="text-[10px] font-black text-amber-700 uppercase tracking-wider italic">
-                ✨ {pkg.selectNote} (যেকোনো ৫টি বেছে নিন)
+                ✨ {pkg.selectNote} ({selectedAttars.length}/5 Selected)
               </p>
             </div>
           )}
