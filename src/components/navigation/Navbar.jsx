@@ -1,6 +1,8 @@
 import React from 'react';
 import { ShoppingCart, Search } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+// 🌟 আপনার এসেটস ফোল্ডার থেকে আসল লোগো ইমেজ ইম্পোর্ট করা হলো
+import logoImg from '../../assets/logo.jpg'; 
 
 export default function Navbar({ cartItemsCount, onCartOpen, searchQuery, setSearchQuery }) {
   const location = useLocation();
@@ -9,14 +11,16 @@ export default function Navbar({ cartItemsCount, onCartOpen, searchQuery, setSea
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-3xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between gap-4">
         
-        {/* Brand Logo - 🌟 ব্র্যান্ডের গাম্ভীর্য ফুটিয়ে তুলতে কালার ও ফন্ট ট্র্যাকিং ফিক্স করা হলো */}
+        {/* Brand Logo - 🌟 টেক্সট বাদ দিয়ে সরাসরি আপনার logo.jpg ইমেজ দিয়ে লক করা হলো */}
         <Link to="/" className="flex items-center space-x-3 shrink-0 select-none group">
-          {/* 'D' আইকন বক্স - একটু স্মুথ শ্যাডো ও ট্রানজিশনসহ */}
-          <div className="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center border border-emerald-800 shrink-0 shadow-xs group-hover:bg-emerald-800 transition-colors">
-            <span className="font-serif text-white font-black text-xl tracking-normal">D</span>
+          <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center shrink-0 shadow-xs border border-gray-100">
+            <img 
+              src={logoImg} 
+              alt="DEENIYAT Essence Logo" 
+              className="w-full h-full object-cover transform-none" 
+            />
           </div>
           
-          {/* ব্র্যান্ড টেক্সট - আভিজাত্যপূর্ণ এমারেল্ড গ্রিন শেড ও পারফেক্ট স্পেসিং */}
           <div className="flex flex-col text-left">
             <span className="font-serif text-xl font-extrabold tracking-widest text-emerald-900 block leading-tight group-hover:text-emerald-700 transition-colors">
               DEENIYAT
@@ -50,7 +54,6 @@ export default function Navbar({ cartItemsCount, onCartOpen, searchQuery, setSea
             <Link to="/about" className="hover:text-emerald-700 transition-colors">Our Story</Link>
           </div>
 
-          {/* Shopping Cart Icon Trigger */}
           <button
             onClick={onCartOpen}
             type="button"
