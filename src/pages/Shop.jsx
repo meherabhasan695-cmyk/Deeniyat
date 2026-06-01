@@ -1,13 +1,14 @@
 import React from 'react';
 import ProductCard from '../components/products/ProductCard';
-import PackageCard from '../components/packages/PackageCard'; // প্যাকেজ কার্ড ইম্পোর্ট করা হলো
-import { ators, comboPackages } from '../data/ators'; // আতর ও প্যাকেজ দুই ডাটাই আনা হলো
+import PackageCard from '../components/packages/PackageCard';
+// 🌟 এখানে বানান 'attars' নিশ্চিত করা হলো যাতে বিল্ড এরর না আসে
+import { attars, comboPackages } from '../data/ators'; 
 
 export default function Shop({ onAddToCart, searchQuery = '' }) {
   const query = searchQuery.toLowerCase().trim();
 
-  // ১. আতর ফিল্টারিং লজিক
-  const filteredAtors = ators.filter(ator => {
+  // ১. আতর ফিল্টারিং লজিক (attars অ্যারে ব্যবহার করে)
+  const filteredAtors = attars.filter(ator => {
     return (
       ator.name.toLowerCase().includes(query) ||
       (ator.bnName && ator.bnName.toLowerCase().includes(query)) ||
@@ -16,7 +17,7 @@ export default function Shop({ onAddToCart, searchQuery = '' }) {
     );
   });
 
-  // ২. কম্বো প্যাকেজ ফিল্টারিং লজিক (যাতে হোম পেজে সার্চ করলে এগুলোও পাওয়া যায়)
+  // ২. কম্বো প্যাকেজ ফিল্টারিং লজিক
   const filteredPackages = comboPackages.filter(pkg => {
     return (
       pkg.name.toLowerCase().includes(query) ||
@@ -32,7 +33,7 @@ export default function Shop({ onAddToCart, searchQuery = '' }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-8 py-12 font-sans">
       
-      {/* যদি সার্চ কুয়েরি খালি থাকে অথবা আতর খুঁজে পাওয়া যায়, তবেই কেবল এই সেকশন দেখাবে */}
+      {/* আতর কালেকশন সেকশন */}
       {(query === '' || filteredAtors.length > 0) && (
         <div className="mb-12">
           <h2 className="font-serif text-3xl font-bold text-zinc-900 mb-6 border-b border-gray-100 pb-3">
@@ -46,7 +47,7 @@ export default function Shop({ onAddToCart, searchQuery = '' }) {
         </div>
       )}
 
-      {/* 🌟 ম্যাজিক পার্ট: সার্চ বারে যদি কিছু লেখা হয় এবং কোনো প্যাকেজ ম্যাচ করে, তবে হোমে বসেই প্যাকেজ কার্ডগুলো ভেসে উঠবে */}
+      {/* হোম পেজে সার্চ করলে ম্যাচিং কম্বো প্যাকেজ দেখানোর সেকশন */}
       {query !== '' && filteredPackages.length > 0 && (
         <div className="mb-12">
           <h2 className="font-serif text-3xl font-bold text-zinc-900 mb-6 border-b border-gray-100 pb-3">
@@ -60,7 +61,7 @@ export default function Shop({ onAddToCart, searchQuery = '' }) {
         </div>
       )}
 
-      {/* কোনো রেজাল্ট না মিললে এই মেসেজ দেখাবে */}
+      {/* কোনো কিছু ম্যাচ না করলে নো রেজাল্ট মেসেজ */}
       {!hasResults && (
         <div className="text-center py-16 bg-white rounded-2xl border border-gray-100 max-w-2xl mx-auto">
           <p className="text-sm text-zinc-600 font-bold">
