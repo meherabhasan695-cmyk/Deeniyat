@@ -1,8 +1,6 @@
 import React from 'react';
 import { ShoppingCart, Search } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-// 🌟 আপনার এসেটস ফোল্ডার থেকে আসল লোগো ইমেজ ইম্পোর্ট করা হলো
-import logoImg from '../../assets/logo.jpg'; 
 
 export default function Navbar({ cartItemsCount, onCartOpen, searchQuery, setSearchQuery }) {
   const location = useLocation();
@@ -11,11 +9,11 @@ export default function Navbar({ cartItemsCount, onCartOpen, searchQuery, setSea
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-3xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between gap-4">
         
-        {/* Brand Logo - 🌟 টেক্সট বাদ দিয়ে সরাসরি আপনার logo.jpg ইমেজ দিয়ে লক করা হলো */}
+        {/* Brand Logo - 🌟 public ফোল্ডারের লোগো ইমেজটি সরাসরি স্ট্রিং পাথে লক করা হলো */}
         <Link to="/" className="flex items-center space-x-3 shrink-0 select-none group">
           <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center shrink-0 shadow-xs border border-gray-100">
             <img 
-              src={logoImg} 
+              src="/logo.jpg" 
               alt="DEENIYAT Essence Logo" 
               className="w-full h-full object-cover transform-none" 
             />
