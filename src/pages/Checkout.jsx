@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingBag, Truck, CreditCard, ShieldCheck, PhoneCall } from 'lucide-react';
+import { ShoppingBag, Truck, CreditCard, ShieldCheck } from 'lucide-react';
 import Navbar from '../components/navigation/Navbar';
 import Footer from '../components/layout/Footer';
 
@@ -14,7 +14,6 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
     notes: ''
   });
   
-  // 🌟 পেমেন্ট মেথড ট্র্যাক করার জন্য নতুন স্টেট
   const [paymentMethod, setPaymentMethod] = useState('cod'); 
   const [isOrdered, setIsOrdered] = useState(false);
 
@@ -56,7 +55,7 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
             </div>
             <h2 className="font-serif text-2xl font-bold text-zinc-900">অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে!</h2>
             <p className="text-sm text-zinc-600 leading-relaxed max-w-sm mx-auto">
-              অর্ডার কনফার্ম হয়েছে ভাই! {paymentMethod !== 'cod' ? 'বিকাশ/নগদ পেমেন্টটি ভেরিফাই করে' : 'খুব দ্রুত কল দিয়ে'} ডেলিভারি প্রসেস শুরু করা হবে। ইনশাআল্লাহ্‌!🎉
+              অর্ডার কনফার্ম হয়েছে ভাই! খুব দ্রুত কল দিয়ে ভেরিফাই করে ডেলিভারি প্রসেস শুরু করা হবে। ইনশাআল্লাহ্‌! 🎉
             </p>
             <button onClick={() => navigate('/')} className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs uppercase tracking-widest px-6 py-3 rounded-xl transition-all cursor-pointer">
               Back to Shopping
@@ -106,7 +105,7 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                     </select>
                   </div>
 
-                  {/* 🌟 বিকাশ এবং নগদ অপশনসহ পুনর্নির্মিত প্রিমিয়াম পেমেন্ট গেটওয়ে সেকশন */}
+                  {/* 🌟 আগের সেই অরিজিনাল ক্লিন প্রসেসের পেমেন্ট মেথড গেটওয়ে কার্ড */}
                   <div className="flex flex-col gap-3 pt-2">
                     <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Select Payment Method</label>
                     
@@ -120,40 +119,24 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                         </div>
                       </label>
 
-                      {/* bKash Option */}
+                      {/* bKash Option with Official Number */}
                       <label className={`border rounded-xl p-3.5 flex items-center gap-3 cursor-pointer transition-all ${paymentMethod === 'bkash' ? 'border-pink-600 bg-pink-50/20' : 'border-gray-200 bg-white hover:bg-gray-50'}`}>
                         <input type="radio" name="payment" checked={paymentMethod === 'bkash'} onChange={() => setPaymentMethod('bkash')} className="accent-pink-600 cursor-pointer" />
                         <div className="text-xs">
-                          <span className="block font-bold text-pink-700">bKash Payment</span>
-                          <span className="block text-[9px] text-zinc-500 mt-0.5">বিকাশ সেন্ড মানি</span>
+                          <span className="block font-bold text-pink-700">bKash (Personal)</span>
+                          <span className="block font-mono text-[10px] text-zinc-600 mt-0.5 font-bold">01711125777</span>
                         </div>
                       </label>
 
-                      {/* Nagad Option */}
+                      {/* Nagad Option with Official Number */}
                       <label className={`border rounded-xl p-3.5 flex items-center gap-3 cursor-pointer transition-all ${paymentMethod === 'nagad' ? 'border-orange-600 bg-orange-50/20' : 'border-gray-200 bg-white hover:bg-gray-50'}`}>
                         <input type="radio" name="payment" checked={paymentMethod === 'nagad'} onChange={() => setPaymentMethod('nagad')} className="accent-orange-600 cursor-pointer" />
                         <div className="text-xs">
-                          <span className="block font-bold text-orange-700">Nagad Payment</span>
-                          <span className="block text-[9px] text-zinc-500 mt-0.5">নগদ সেন্ড মানি</span>
+                          <span className="block font-bold text-orange-700">Nagad (Personal)</span>
+                          <span className="block font-mono text-[10px] text-zinc-600 mt-0.5 font-bold">01522123642</span>
                         </div>
                       </label>
                     </div>
-
-                    {/* মোবাইল ব্যাংকিং সিলেক্ট করলে কাস্টমারের জন্য ডাইনামিক গাইডবক্স */}
-                    {paymentMethod !== 'cod' && (
-                      <div className="mt-2 bg-zinc-50 border border-dashed border-gray-300 rounded-xl p-4 text-xs text-zinc-700 space-y-2 animate-in fade-in duration-200">
-                        <p className="font-bold flex items-center gap-1.5 text-zinc-900">
-                          <PhoneCall className="w-3.5 h-3.5 text-emerald-700" /> 
-                          {paymentMethod === 'bkash' ? 'বিকাশ' : 'নগদ'} পেমেন্ট নির্দেশনা:
-                        </p>
-                        <p>
-                          দয়া করে আমাদের পার্সোনাল নাম্বারে মোট <strong className="text-emerald-700">{grandTotal} BDT</strong> সেন্ড মানি করুন। অর্ডার প্লেস করার পর আমাদের প্রতিনিধি আপনাকে কল দিলে পেমেন্ট রেফারেন্স বা ট্রানজেকশন আইডিটি কনফার্ম করবেন।
-                        </p>
-                        <p className="bg-white px-3 py-2 rounded-lg border border-gray-200 font-mono text-center text-sm font-black text-zinc-900 tracking-wider select-all">
-                          📱 ০১৭XXXXXXXX (পার্সোনাল)
-                        </p>
-                      </div>
-                    )}
                   </div>
 
                   <div className="flex flex-col gap-1.5 pt-1">
@@ -179,7 +162,7 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                   <div className="space-y-2 pt-2 border-t border-gray-200 text-xs text-zinc-700">
                     <div className="flex justify-between"><span>Subtotal</span><span className="font-semibold text-zinc-900">{totalAmount} BDT</span></div>
                     <div className="flex justify-between"><span>Delivery Charge</span><span className="font-semibold text-zinc-900">+{deliveryCharge} BDT</span></div>
-                    <div className="flex justify-between text-zinc-900 font-black text-sm pt-2 border-t border-dashed border-gray-300 mt-2"><span>Total Payable</span><span className="text-emerald-700">{grandTotal} BDT</span></div>
+                    <div className="flex justify-between text-zinc-900 font-black text-sm pt-2 border-t border-dashed border-gray-200 mt-2"><span>Total Payable</span><span className="text-emerald-700">{grandTotal} BDT</span></div>
                   </div>
                   <button onClick={handleSubmit} type="button" className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-sans font-bold text-xs uppercase tracking-widest py-4 rounded-xl transition-all shadow-md cursor-pointer text-center">Place Order ({grandTotal} BDT)</button>
                 </div>
