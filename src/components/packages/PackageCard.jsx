@@ -1,46 +1,54 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Gift, CheckSquare, Square } from 'lucide-react';
+import { atorsData } from '../../data/ators'; // Ators list theke name gulo select korar jonno
 
 export default function PackageCard({ pkg, onAddPackageToCart }) {
-  // প্রিমিয়াম প্যাকেজের প্রথম ৫টি আইটেম ডিফল্ট সিলেক্টেড রাখার জন্য
   const isPremium = pkg.selectNote;
-  const defaultSelected = pkg.items && pkg.items.length > 5 ? pkg.items.slice(0, 5) : (pkg.items || []);
   
-  const [selectedAttars, setSelectedAttars] = useState(defaultSelected);
-  const [customText, setCustomText] = useState(''); // কাস্টম প্যাকেজের টেক্সট ট্র্যাক করার জন্য
+  // Premium package er jonno checkbox state
+  const defaultPremiumSelected = pkg.items && pkg.items.length > 5 ? pkg.items.slice(0, 5) : (pkg.items || []);
+  const [selectedPremiumAttars, setSelectedPremiumAttars] = useState(defaultPremiumSelected);
 
-  // প্রিমিয়াম প্যাকেজের চেকবক্স টগল লজিক
-  const handleToggleAttar = (item) => {
-    if (selectedAttars.includes(item)) {
-      setSelectedAttars(selectedAttars.filter(i => i !== item));
+  // 🌟 Customized Package er jonno 5 ta dropdown ar jonno individual state
+  const [customDropdowns, setCustomDropdowns] = useState([
+    atorsData[0]?.name || '',
+    atorsData[1]?.name || '',
+    atorsData[2]?.name || '',
+    atorsData[3]?.name || '',
+    atorsData[4]?.name || ''
+  ]);
+
+  const handleCustomDropdownChange = (index, value) => {
+    const updated = [...customDropdowns];
+    updated[index] = value;
+    setCustomDropdowns(updated);
+  };
+
+  const handleTogglePremiumAttar = (item) => {
+    if (selectedPremiumAttars.includes(item)) {
+      setSelectedPremiumAttars(selectedPremiumAttars.filter(i => i !== item));
     } else {
-      if (selectedAttars.length >= 5) {
+      if (selectedPremiumAttars.length >= 5) {
         alert('ভাই, এই প্যাকেজে সর্বোচ্চ ৫টি আতর সিলেক্ট করতে পারবেন।');
         return;
       }
-      setSelectedAttars([...selectedAttars, item]);
+      setSelectedPremiumAttars([...selectedPremiumAttars, item]);
     }
   };
 
   const handleAddPackageClick = () => {
-    // ১. প্রিমিয়াম প্যাকেজের ক্ষেত্রে ৫টি সিলেক্ট না থাকলে রেস্ট্রিকশন
-    if (isPremium && selectedAttars.length !== 5) {
-      alert(`ভাই, দয়া করে যেকোনো ৫টি আতর সিলেক্ট করুন। আপনি এখন ${selectedAttars.length}টি সিলেক্ট করেছেন।`);
-      return;
-    }
-
-    // ২. কাস্টমাইজড প্যাকেজের ক্ষেত্রে কিছু না লিখলে অ্যালার্ট
-    if (pkg.isCustom && !customText.trim()) {
-      alert('ভাই, আপনার কাস্টমাইজড প্যাকেজে কোন কোন আতর নিতে চান, তা নিচের বক্সে লিখে দিন।');
+    if (isPremium && selectedPremiumAttars.length !== 5) {
+      alert(`ভাই, দয়া করে যেকোনো ৫টি আতর সিলেক্ট করুন। আপনি এখন ${selectedPremiumAttars.length}টি সিলেক্ট করেছেন।`);
       return;
     }
 
     if (onAddPackageToCart) {
       let detailsString = 'Combo Set';
       if (isPremium) {
-        detailsString = `Premium 5 Items (${selectedAttars.join(', ')})`;
+        detailsString = `Premium 5 Items (${selectedPremiumAttars.join(', ')})`;
       } else if (pkg.isCustom) {
-        detailsString = `Custom Order: ${customText.trim()}`;
+        // Dropdown internal values niye string banano holo
+        detailsString = `Customized 5 Items (${customDropdowns.join(', ')})`;
       } else if (pkg.items) {
         detailsString = `Regular 5 Items (${pkg.items.join(', ')})`;
       }
@@ -73,7 +81,7 @@ export default function PackageCard({ pkg, onAddPackageToCart }) {
           <div>
             <h3 className="font-serif text-base font-bold text-zinc-900">{pkg.name}</h3>
             <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest block mt-0.5">
-              LUXURY SET
+              LUXURY COMBO
             </span>
           </div>
           <span className="bg-emerald-50 border border-emerald-100 text-emerald-800 font-sans text-xs font-black px-2.5 py-1 rounded-lg">
@@ -91,45 +99,52 @@ export default function PackageCard({ pkg, onAddPackageToCart }) {
           </div>
         )}
 
-        {/* 🌟 ডাইনামিক কন্টেন্ট বক্স: প্যাকেজের টাইপ অনুযায়ী ভেতরে চেঞ্জ হবে */}
+        {/* Dynamic Items Content Box */}
         <div className="bg-zinc-50 border border-gray-100 rounded-xl p-4 text-left">
           {pkg.isCustom ? (
-            // ক. কাস্টমাইজড প্যাকেজ হলে সুন্দর একটা নোট ও ইনপুট বক্স দেখাবে
-            <div className="space-y-2.5">
-              <label className="text-[10px] uppercase tracking-wider font-extrabold text-zinc-500 block">
-                Write Your Chosen Attars
+            // 🌟 2nd Issue Solution: Customized Package er jonno 5 ta dynamic Dropdown Selection
+            <div className="space-y-3">
+              <label className="text-[10px] uppercase tracking-wider font-black text-zinc-500 block mb-1">
+                Select Your 5 Custom Attars
               </label>
-              <textarea
-                value={customText}
-                onChange={(e) => setCustomText(e.target.value)}
-                rows="3"
-                placeholder="আপনার পছন্দের আতরগুলোর নাম এখানে কমা (,) দিয়ে লিখুন... (যেমন: Armani, Cool Water)"
-                className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-medium resize-none shadow-3xs"
-              />
+              {[0, 1, 2, 3, 4].map((num) => (
+                <div key={num} className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-zinc-400 w-4">{num + 1}.</span>
+                  <select
+                    value={customDropdowns[num]}
+                    onChange={(e) => handleCustomDropdownChange(num, e.target.value)}
+                    className="w-full bg-white border border-gray-200 rounded-xl px-3 py-1.5 text-xs font-medium text-zinc-900 focus:outline-none focus:border-emerald-700 cursor-pointer shadow-3xs"
+                  >
+                    {atorsData.map((ator) => (
+                      <option key={ator.id} value={ator.name}>
+                        {ator.name} ({ator.bnName})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
             </div>
           ) : (
-            // খ. রেগুলার অথবা প্রিমিয়াম প্যাকেজ হলে লিস্ট দেখাবে
+            // Regular ebong Premium Package list view
             <ul className="space-y-2.5 text-xs text-zinc-700 font-medium">
               {pkg.items && pkg.items.map((item, idx) => {
-                const isSelected = selectedAttars.includes(item);
+                const isSelected = selectedPremiumAttars.includes(item);
 
                 return (
                   <li 
                     key={idx} 
-                    onClick={() => isPremium && handleToggleAttar(item)}
+                    onClick={() => isPremium && handleTogglePremiumAttar(item)}
                     className={`flex items-center gap-2.5 p-0.5 rounded-lg transition-all ${
-                      isPremium ? 'cursor-pointer hover:bg-gray-200/70 select-none' : ''
+                      isPremium ? 'cursor-pointer hover:bg-gray-100/70 select-none' : ''
                     }`}
                   >
                     {isPremium ? (
-                      // প্রিমিয়াম প্যাকেজের জন্য চেকবক্স
                       isSelected ? (
                         <CheckSquare className="w-4 h-4 text-emerald-700 shrink-0" />
                       ) : (
                         <Square className="w-4 h-4 text-gray-300 shrink-0" />
                       )
                     ) : (
-                      // রেগুলার প্যাকেজের জন্য ফিক্সড ডট
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0" />
                     )}
                     
@@ -142,11 +157,10 @@ export default function PackageCard({ pkg, onAddPackageToCart }) {
             </ul>
           )}
 
-          {/* প্রিমিয়াম প্যাকেজের ইন্ডিকেটর নোট */}
           {isPremium && (
             <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-2 text-center">
               <p className="text-[10px] font-black text-amber-700 uppercase tracking-wider italic">
-                ✨ {pkg.selectNote} ({selectedAttars.length}/5 Selected)
+                ✨ {pkg.selectNote} ({selectedPremiumAttars.length}/5 Selected)
               </p>
             </div>
           )}
