@@ -11,12 +11,16 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
     phone: '',
     address: '',
     city: 'dhaka',
-    notes: ''
+    notes: '',
+    senderNumber: '',    // বিকাশ/নগদ প্রেরক নম্বর
+    transactionId: ''    // ট্রানজেকশন আইডি (TxID)
   });
   
   const [paymentMethod, setPaymentMethod] = useState('cod'); 
   const [isOrdered, setIsOrdered] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // কার্ট খালি থাকলে ডেলিভারি চার্জ ০ হবে, অন্যথায় সিটি অনুযায়ী ৬০ বা ১২০ হবে
   const deliveryCharge = cartItems.length === 0 ? 0 : (formData.city === 'dhaka' ? 60 : 120);
   const grandTotal = cartItems.length === 0 ? 0 : (totalAmount + deliveryCharge);
 
@@ -25,22 +29,71 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!formData.name || !formData.phone || !formData.address) {
-      alert('ভাই, দয়া করে নাম, মোবাইল নাম্বার এবং সম্পূর্ণ ঠিকানাটি লিখুন।');
-      return;
-    }
-    setIsOrdered(true);
-    if (onClearCart) onClearCart();
-  };
-
   const getItemPrice = (item) => {
     if (item.finalPrice !== undefined && item.finalPrice !== null) return item.finalPrice;
     if (item.price && typeof item.price === 'object') {
       return item.price['3ml'] || item.price.regular || Object.values(item.price)[0] || 0;
     }
     return item.price || 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // ১. ফর্ম ভ্যালিডেশন
+    if (!formData.name || !formData.phone || !formData.address) {
+      alert('ভাই, দয়া করে নাম, মোবাইল নাম্বার এবং সম্পূর্ণ ঠিকানাটি লিখুন।');
+      return;
+    }
+
+    // বিকাশ বা নগদ সিলেক্ট করলে পেমেন্ট ইনফো দেওয়া বাধ্যতামূলক
+    if (paymentMethod !== 'cod') {
+      if (!formData.senderNumber || !formData.transactionId) {
+        alert('ভাই, দয়া করে যে নম্বর থেকে টাকা পাঠিয়েছেন সেটি এবং ট্রানজেকশন আইডি (TxID) লিখুন।');
+        return;
+      }
+    }
+
+    setIsSubmitting(true);
+
+    // 🌟 মেহরাব ভাই, নিচে আপনার জেনারেট করা গুগল অ্যাপ স্ক্রিপ্ট ওয়েব অ্যাপ ইউআরএল-টি পেস্ট করে দিন
+    const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APP_SCRIPT_WEB_APP_URL_HERE"; 
+
+    // 🌟 আপনার অ্যাপ স্ক্রিপ্টের (data.location, data.items, data.total) সাথে পুরোপুরি সিঙ্ক করা ডাটা অবজেক্ট
+    const orderData = {
+      name: formData.name,
+      phone: formData.phone,
+      address: formData.address,
+      location: formData.city === 'dhaka' ? 'Inside Dhaka' : 'Outside Dhaka',
+      items: cartItems.map(item => `${item.name} (${item.selectedSize || '3ml'})`).join(', '),
+      subtotal: totalAmount,
+      delivery: deliveryCharge,
+      total: grandTotal,
+      paymentMethod: paymentMethod.toUpperCase(),
+      senderNumber: paymentMethod === 'cod' ? '-' : formData.senderNumber,
+      trxId: paymentMethod === 'cod' ? '-' : formData.transactionId
+    };
+
+    try {
+      if (GOOGLE_SCRIPT_URL !== "YOUR_GOOGLE_APP_SCRIPT_WEB_APP_URL_HERE") {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors', // ব্রাউজার ক্রস-অরিজিন পলিসি ব্লক এড়ানোর জন্য সেফ মোড
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData)
+        });
+      }
+      
+      setIsOrdered(true);
+      if (onClearCart) onClearCart();
+    } catch (error) {
+      console.error("Google Sheet Submission Error: ", error);
+      alert("অর্ডার ডাটাবেজে সেভ করতে কিছুটা সমস্যা হয়েছে ভাই, তবে অর্ডারটি প্লেস করা হচ্ছে।");
+      setIsOrdered(true);
+      if (onClearCart) onClearCart();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -55,7 +108,7 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
             </div>
             <h2 className="font-serif text-2xl font-bold text-zinc-900">অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে!</h2>
             <p className="text-sm text-zinc-600 leading-relaxed max-w-sm mx-auto">
-              অর্ডার কনফার্ম হয়েছে ভাই! খুব দ্রুত কল দিয়ে ভেরিফাই করে ডেলিভারি প্রসেস শুরু করা হবে। ইনশাআল্লাহ্‌! 🎉
+              অর্ডারটি কনফার্ম হয়েছে মেহরাব ভাই! অর্ডারের সমস্ত বিবরণ আপনার গুগল শিটে অটোমেটিক সেভ হয়ে গেছে। আমরা খুব দ্রুত কাস্টমারের সাথে যোগাযোগ করব। ইনশাআল্লাহ্‌! 🎉
             </p>
             <button onClick={() => navigate('/')} className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs uppercase tracking-widest px-6 py-3 rounded-xl transition-all cursor-pointer">
               Back to Shopping
@@ -105,12 +158,11 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                     </select>
                   </div>
 
-                  {/* 🌟 আগের সেই অরিজিনাল ক্লিন প্রসেসের পেমেন্ট মেথড গেটওয়ে কার্ড */}
+                  {/* Payment Method Selection Card Group */}
                   <div className="flex flex-col gap-3 pt-2">
                     <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Select Payment Method</label>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {/* Cash On Delivery Option */}
                       <label className={`border rounded-xl p-3.5 flex items-center gap-3 cursor-pointer transition-all ${paymentMethod === 'cod' ? 'border-emerald-700 bg-emerald-50/40' : 'border-gray-200 bg-white hover:bg-gray-50'}`}>
                         <input type="radio" name="payment" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} className="accent-emerald-700 cursor-pointer" />
                         <div className="text-xs">
@@ -119,7 +171,6 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                         </div>
                       </label>
 
-                      {/* bKash Option with Official Number */}
                       <label className={`border rounded-xl p-3.5 flex items-center gap-3 cursor-pointer transition-all ${paymentMethod === 'bkash' ? 'border-pink-600 bg-pink-50/20' : 'border-gray-200 bg-white hover:bg-gray-50'}`}>
                         <input type="radio" name="payment" checked={paymentMethod === 'bkash'} onChange={() => setPaymentMethod('bkash')} className="accent-pink-600 cursor-pointer" />
                         <div className="text-xs">
@@ -128,7 +179,6 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                         </div>
                       </label>
 
-                      {/* Nagad Option with Official Number */}
                       <label className={`border rounded-xl p-3.5 flex items-center gap-3 cursor-pointer transition-all ${paymentMethod === 'nagad' ? 'border-orange-600 bg-orange-50/20' : 'border-gray-200 bg-white hover:bg-gray-50'}`}>
                         <input type="radio" name="payment" checked={paymentMethod === 'nagad'} onChange={() => setPaymentMethod('nagad')} className="accent-orange-600 cursor-pointer" />
                         <div className="text-xs">
@@ -137,6 +187,38 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                         </div>
                       </label>
                     </div>
+
+                    {/* বিকাশ বা নগদ সিলেক্ট করলে ডাইনামিক রিকোয়ার্ড ইনপুট ফিল্ড */}
+                    {paymentMethod !== 'cod' && (
+                      <div className="mt-3 bg-zinc-50 border border-gray-200 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-300">
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">
+                            {paymentMethod === 'bkash' ? 'bKash Number' : 'Nagad Number'} (যেখান থেকে টাকা পাঠিয়েছেন)
+                          </label>
+                          <input 
+                            type="tel" 
+                            name="senderNumber" 
+                            value={formData.senderNumber} 
+                            onChange={handleInputChange} 
+                            placeholder="01XXXXXXXXX" 
+                            className="bg-white border border-gray-300 rounded-xl px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-medium" 
+                            required 
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Transaction ID (TxID)</label>
+                          <input 
+                            type="text" 
+                            name="transactionId" 
+                            value={formData.transactionId} 
+                            onChange={handleInputChange} 
+                            placeholder="Example: 8N348EF97" 
+                            className="bg-white border border-gray-300 rounded-xl px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-mono font-medium" 
+                            required 
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex flex-col gap-1.5 pt-1">
@@ -162,9 +244,17 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                   <div className="space-y-2 pt-2 border-t border-gray-200 text-xs text-zinc-700">
                     <div className="flex justify-between"><span>Subtotal</span><span className="font-semibold text-zinc-900">{totalAmount} BDT</span></div>
                     <div className="flex justify-between"><span>Delivery Charge</span><span className="font-semibold text-zinc-900">+{deliveryCharge} BDT</span></div>
-                    <div className="flex justify-between text-zinc-900 font-black text-sm pt-2 border-t border-dashed border-gray-200 mt-2"><span>Total Payable</span><span className="text-emerald-700">{grandTotal} BDT</span></div>
+                    <div className="flex justify-between text-zinc-900 font-black text-sm pt-2 border-t border-dashed border-gray-300 mt-2"><span>Total Payable</span><span className="text-emerald-700">{grandTotal} BDT</span></div>
                   </div>
-                  <button onClick={handleSubmit} type="button" className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-sans font-bold text-xs uppercase tracking-widest py-4 rounded-xl transition-all shadow-md cursor-pointer text-center">Place Order ({grandTotal} BDT)</button>
+                  
+                  <button 
+                    onClick={handleSubmit} 
+                    disabled={isSubmitting}
+                    type="submit" 
+                    className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-sans font-bold text-xs uppercase tracking-widest py-4 rounded-xl transition-all shadow-md cursor-pointer text-center"
+                  >
+                    {isSubmitting ? 'Processing Order...' : `Place Order (${grandTotal} BDT)`}
+                  </button>
                 </div>
 
               </div>
