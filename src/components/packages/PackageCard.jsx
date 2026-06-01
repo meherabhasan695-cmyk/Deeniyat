@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Gift, CheckSquare, Square } from 'lucide-react';
-import { atorsData } from '../../data/ators'; // Ators list theke name gulo select korar jonno
+import { atorsData } from '../../data/ators'; 
 
-export default function PackageCard({ pkg, onAddPackageToCart }) {
+export default function PackageCard({ pkg, onAddPackageToCart, onAddToCart }) {
   const isPremium = pkg.selectNote;
   
-  // Premium package er jonno checkbox state
+  // Premium package এর জন্য checkbox state
   const defaultPremiumSelected = pkg.items && pkg.items.length > 5 ? pkg.items.slice(0, 5) : (pkg.items || []);
   const [selectedPremiumAttars, setSelectedPremiumAttars] = useState(defaultPremiumSelected);
 
-  // 🌟 Customized Package er jonno 5 ta dropdown ar jonno individual state
+  // Customized Package এর জন্য 5টি ড্রপডাউন স্টেট
   const [customDropdowns, setCustomDropdowns] = useState([
     atorsData[0]?.name || '',
     atorsData[1]?.name || '',
@@ -42,25 +42,32 @@ export default function PackageCard({ pkg, onAddPackageToCart }) {
       return;
     }
 
-    if (onAddPackageToCart) {
-      let detailsString = 'Combo Set';
-      if (isPremium) {
-        detailsString = `Premium 5 Items (${selectedPremiumAttars.join(', ')})`;
-      } else if (pkg.isCustom) {
-        // Dropdown internal values niye string banano holo
-        detailsString = `Customized 5 Items (${customDropdowns.join(', ')})`;
-      } else if (pkg.items) {
-        detailsString = `Regular 5 Items (${pkg.items.join(', ')})`;
-      }
+    let detailsString = 'Combo Set';
+    if (isPremium) {
+      detailsString = `Premium 5 Items (${selectedPremiumAttars.join(', ')})`;
+    } else if (pkg.isCustom) {
+      detailsString = `Customized 5 Items (${customDropdowns.join(', ')})`;
+    } else if (pkg.items) {
+      detailsString = `Regular 5 Items (${pkg.items.join(', ')})`;
+    }
 
-      onAddPackageToCart({
-        id: pkg.id,
-        name: pkg.name,
-        finalPrice: pkg.price,
-        selectedSize: detailsString,
-        image: pkg.image,
-        isCombo: true
-      });
+    // কার্ট আইটেম অবজেক্ট রেডি করা হলো
+    const cartItemData = {
+      id: pkg.id,
+      name: pkg.name,
+      finalPrice: pkg.price,
+      selectedSize: detailsString,
+      image: pkg.image,
+      isCombo: true
+    };
+
+    // 🌟 ফাংশনের নাম নিয়ে যেন আর কোনো প্যাঁচ না লাগে, সেজন্য ২টি নামই হ্যান্ডেল করা হলো
+    if (onAddToCart) {
+      onAddToCart(cartItemData);
+    } else if (onAddPackageToCart) {
+      onAddPackageToCart(cartItemData);
+    } else {
+      console.error("Cart function not found in props!");
     }
   };
 
@@ -102,7 +109,6 @@ export default function PackageCard({ pkg, onAddPackageToCart }) {
         {/* Dynamic Items Content Box */}
         <div className="bg-zinc-50 border border-gray-100 rounded-xl p-4 text-left">
           {pkg.isCustom ? (
-            // 🌟 2nd Issue Solution: Customized Package er jonno 5 ta dynamic Dropdown Selection
             <div className="space-y-3">
               <label className="text-[10px] uppercase tracking-wider font-black text-zinc-500 block mb-1">
                 Select Your 5 Custom Attars
@@ -125,7 +131,6 @@ export default function PackageCard({ pkg, onAddPackageToCart }) {
               ))}
             </div>
           ) : (
-            // Regular ebong Premium Package list view
             <ul className="space-y-2.5 text-xs text-zinc-700 font-medium">
               {pkg.items && pkg.items.map((item, idx) => {
                 const isSelected = selectedPremiumAttars.includes(item);
