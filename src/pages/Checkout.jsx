@@ -12,15 +12,14 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
     address: '',
     city: 'dhaka',
     notes: '',
-    senderNumber: '',    // বিকাশ/নগদ প্রেরক নম্বর
-    transactionId: ''    // ট্রানজেকশন আইডি (TxID)
+    senderNumber: '',    
+    transactionId: ''    
   });
   
   const [paymentMethod, setPaymentMethod] = useState('cod'); 
   const [isOrdered, setIsOrdered] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // কার্ট খালি থাকলে ডেলিভারি চার্জ ০ হবে, অন্যথায় সিটি অনুযায়ী ৬০ বা ১২০ হবে
   const deliveryCharge = cartItems.length === 0 ? 0 : (formData.city === 'dhaka' ? 60 : 120);
   const grandTotal = cartItems.length === 0 ? 0 : (totalAmount + deliveryCharge);
 
@@ -40,13 +39,11 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // ১. ফর্ম ভ্যালিডেশন
     if (!formData.name || !formData.phone || !formData.address) {
       alert('ভাই, দয়া করে নাম, মোবাইল নাম্বার এবং সম্পূর্ণ ঠিকানাটি লিখুন।');
       return;
     }
 
-    // বিকাশ বা নগদ সিলেক্ট করলে পেমেন্ট ইনফো দেওয়া বাধ্যতামূলক
     if (paymentMethod !== 'cod') {
       if (!formData.senderNumber || !formData.transactionId) {
         alert('ভাই, দয়া করে যে নম্বর থেকে টাকা পাঠিয়েছেন সেটি এবং ট্রানজেকশন আইডি (TxID) লিখুন।');
@@ -56,10 +53,9 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
 
     setIsSubmitting(true);
 
-    // 🌟 মেহরাব ভাই, নিচে আপনার জেনারেট করা গুগল অ্যাপ স্ক্রিপ্ট ওয়েব অ্যাপ ইউআরএল-টি পেস্ট করে দিন
+    // 🌟 এখানে আপনার জেনারেট করা গুগল অ্যাপ স্ক্রিপ্ট ওয়েব অ্যাপ ইউআরএল-টি বসিয়ে দিন ভাই
     const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APP_SCRIPT_WEB_APP_URL_HERE"; 
 
-    // 🌟 আপনার অ্যাপ স্ক্রিপ্টের (data.location, data.items, data.total) সাথে পুরোপুরি সিঙ্ক করা ডাটা অবজেক্ট
     const orderData = {
       name: formData.name,
       phone: formData.phone,
@@ -78,7 +74,7 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
       if (GOOGLE_SCRIPT_URL !== "YOUR_GOOGLE_APP_SCRIPT_WEB_APP_URL_HERE") {
         await fetch(GOOGLE_SCRIPT_URL, {
           method: 'POST',
-          mode: 'no-cors', // ব্রাউজার ক্রস-অরিজিন পলিসি ব্লক এড়ানোর জন্য সেফ মোড
+          mode: 'no-cors', 
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(orderData)
         });
@@ -126,10 +122,11 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              // 🌟 পুরো গ্রিডটাকে ফর্ম ট্যাগ দিয়ে র্যাপ করা হলো যাতে ডানপাশের মেইন সাবমিট বাটনটি ক্লিক করলে ফর্ম ট্রিগার হয়
+              <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 
-                {/* Left Column: Form */}
-                <form onSubmit={handleSubmit} className="lg:col-span-7 bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 space-y-6">
+                {/* Left Column: Form Info */}
+                <div className="lg:col-span-7 bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 space-y-6">
                   <h3 className="font-serif text-lg font-bold text-zinc-900 flex items-center gap-2 border-b border-gray-100 pb-3">
                     <Truck className="w-5 h-5 text-emerald-700" /> Delivery Information
                   </h3>
@@ -152,13 +149,13 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                   
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Region / City</label>
-                    <select name="city" value={formData.city} onChange={handleInputChange} className="bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-medium cursor-pointer">
+                    <select name="city" value={formData.city} onChange={handleInputChange} className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-medium cursor-pointer">
                       <option value="dhaka">Inside Dhaka (Dhaka City)</option>
                       <option value="outside">Outside Dhaka (All over BD)</option>
                     </select>
                   </div>
 
-                  {/* Payment Method Selection Card Group */}
+                  {/* Payment Method Group */}
                   <div className="flex flex-col gap-3 pt-2">
                     <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Select Payment Method</label>
                     
@@ -188,34 +185,18 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                       </label>
                     </div>
 
-                    {/* বিকাশ বা নগদ সিলেক্ট করলে ডাইনামিক রিকোয়ার্ড ইনপুট ফিল্ড */}
+                    {/* bKash/Nagad Fields */}
                     {paymentMethod !== 'cod' && (
                       <div className="mt-3 bg-zinc-50 border border-gray-200 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-300">
                         <div className="flex flex-col gap-1.5">
                           <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">
                             {paymentMethod === 'bkash' ? 'bKash Number' : 'Nagad Number'} (যেখান থেকে টাকা পাঠিয়েছেন)
                           </label>
-                          <input 
-                            type="tel" 
-                            name="senderNumber" 
-                            value={formData.senderNumber} 
-                            onChange={handleInputChange} 
-                            placeholder="01XXXXXXXXX" 
-                            className="bg-white border border-gray-300 rounded-xl px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-medium" 
-                            required 
-                          />
+                          <input type="tel" name="senderNumber" value={formData.senderNumber} onChange={handleInputChange} placeholder="01XXXXXXXXX" className="bg-white border border-gray-300 rounded-xl px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-medium" required />
                         </div>
                         <div className="flex flex-col gap-1.5">
                           <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Transaction ID (TxID)</label>
-                          <input 
-                            type="text" 
-                            name="transactionId" 
-                            value={formData.transactionId} 
-                            onChange={handleInputChange} 
-                            placeholder="Example: 8N348EF97" 
-                            className="bg-white border border-gray-300 rounded-xl px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-mono font-medium" 
-                            required 
-                          />
+                          <input type="text" name="transactionId" value={formData.transactionId} onChange={handleInputChange} placeholder="Example: 8N348EF97" className="bg-white border border-gray-300 rounded-xl px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-mono font-medium" required />
                         </div>
                       </div>
                     )}
@@ -225,7 +206,7 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                     <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Order Notes (Optional)</label>
                     <input type="text" name="notes" value={formData.notes} onChange={handleInputChange} placeholder="বিশেষ কোনো নির্দেশনা থাকলে লিখতে পারেন" className="bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-medium" />
                   </div>
-                </form>
+                </div>
 
                 {/* Right Column: Order Summary */}
                 <div className="lg:col-span-5 bg-gray-50 border border-gray-200 rounded-2xl p-6 space-y-5">
@@ -244,20 +225,20 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                   <div className="space-y-2 pt-2 border-t border-gray-200 text-xs text-zinc-700">
                     <div className="flex justify-between"><span>Subtotal</span><span className="font-semibold text-zinc-900">{totalAmount} BDT</span></div>
                     <div className="flex justify-between"><span>Delivery Charge</span><span className="font-semibold text-zinc-900">+{deliveryCharge} BDT</span></div>
-                    <div className="flex justify-between text-zinc-900 font-black text-sm pt-2 border-t border-dashed border-gray-300 mt-2"><span>Total Payable</span><span className="text-emerald-700">{grandTotal} BDT</span></div>
+                    <div className="flex justify-between text-zinc-900 font-black text-sm pt-2 border-t border-dashed border-gray-200 mt-2"><span>Total Payable</span><span className="text-emerald-700">{grandTotal} BDT</span></div>
                   </div>
                   
+                  {/* 🌟 এই বাটনের টাইপ এখন প্রপারলি type="submit" করে দেওয়া হলো যাতে রিয়াল-টাইমে handleSubmit ট্রিগার হয় */}
                   <button 
-                    onClick={handleSubmit} 
                     disabled={isSubmitting}
                     type="submit" 
-                    className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-sans font-bold text-xs uppercase tracking-widest py-4 rounded-xl transition-all shadow-md cursor-pointer text-center"
+                    className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-sans font-bold text-xs uppercase tracking-widest py-4 rounded-xl transition-all shadow-md cursor-pointer text-center block"
                   >
                     {isSubmitting ? 'Processing Order...' : `Place Order (${grandTotal} BDT)`}
                   </button>
                 </div>
 
-              </div>
+              </form>
             )}
           </>
         )}
