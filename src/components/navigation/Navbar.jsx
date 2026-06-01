@@ -9,16 +9,21 @@ export default function Navbar({ cartItemsCount, onCartOpen, searchQuery, setSea
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-3xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between gap-4">
         
-        {/* Brand Logo - 🌟 মোবাইল ও পিসি সব স্ক্রিনেই লোগো + টেক্সট একসাথে লক করে দেওয়া হলো */}
-        <Link to="/" className="flex items-center space-x-3 shrink-0 select-none">
-          {/* লোগো আইকন (D) */}
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center border border-emerald-100 shrink-0">
-            <span className="font-serif text-emerald-800 font-black text-xl">D</span>
+        {/* Brand Logo - 🌟 ব্র্যান্ডের গাম্ভীর্য ফুটিয়ে তুলতে কালার ও ফন্ট ট্র্যাকিং ফিক্স করা হলো */}
+        <Link to="/" className="flex items-center space-x-3 shrink-0 select-none group">
+          {/* 'D' আইকন বক্স - একটু স্মুথ শ্যাডো ও ট্রানজিশনসহ */}
+          <div className="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center border border-emerald-800 shrink-0 shadow-xs group-hover:bg-emerald-800 transition-colors">
+            <span className="font-serif text-white font-black text-xl tracking-normal">D</span>
           </div>
-          {/* ব্র্যান্ড নেম টেক্সট (এবার সবসময় শো করবে) */}
+          
+          {/* ব্র্যান্ড টেক্সট - আভিজাত্যপূর্ণ এমারেল্ড গ্রিন শেড ও পারফেক্ট স্পেসিং */}
           <div className="flex flex-col text-left">
-            <span className="font-serif text-base sm:text-lg font-black tracking-wider text-zinc-900 block leading-tight">DEENIYAT</span>
-            <span className="font-sans text-[9px] uppercase tracking-widest text-emerald-700 font-bold block mt-0.5">Essence</span>
+            <span className="font-serif text-xl font-extrabold tracking-widest text-emerald-900 block leading-tight group-hover:text-emerald-700 transition-colors">
+              DEENIYAT
+            </span>
+            <span className="font-sans text-[10px] uppercase tracking-[0.25em] text-emerald-600 font-black block mt-0.5 pl-0.5">
+              Essence
+            </span>
           </div>
         </Link>
 
