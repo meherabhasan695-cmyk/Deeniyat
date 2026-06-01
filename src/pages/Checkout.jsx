@@ -54,8 +54,8 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
 
     setIsSubmitting(true);
 
-    // 🌟 মেহরাব ভাই, এখানে আপনার জেনারেট করা গুগল অ্যাপ স্ক্রিপ্ট ওয়েব অ্যাপ ইউআরএল-টি বসিয়ে দিন
-    const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APP_SCRIPT_WEB_APP_URL_HERE"; 
+    // 🌟 মেহরাব ভাই, আপনার দেওয়া অরিজিনাল লাইভ গুগল স্ক্রিপ্ট লিংকটি এখানে সফলভাবে বসিয়ে দেওয়া হলো
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyYPIP5gbbKWIb4f7FgJI3YKL74ptExcsm1AzdiSzNuf6vgs1j2P8xV2h0FrmUkA30rbg/exec"; 
 
     const orderData = {
       name: formData.name,
@@ -72,17 +72,15 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
     };
 
     try {
-      // ইউআরএল প্লেসহোল্ডার চেঞ্জ করা হলেই কেবল fetch রিকোয়েস্ট পাঠাবে
-      if (GOOGLE_SCRIPT_URL !== "YOUR_GOOGLE_APP_SCRIPT_WEB_APP_URL_HERE") {
-        await fetch(GOOGLE_SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors', // CORS ব্লক এড়ানোর জন্য সেফ মোড
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(orderData)
-        });
-      }
+      // সরাসরি রিয়েল-টাইম রিকোয়েস্ট পাঠানো হচ্ছে
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors', // CORS ব্লক এড়ানোর জন্য সেফ মোড
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData)
+      });
       
       setIsOrdered(true);
       if (onClearCart) onClearCart();
@@ -126,10 +124,9 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                 </button>
               </div>
             ) : (
-              /* 🌟 HTML স্ট্যান্ডার্ড মেনে সম্পূর্ণ কন্টেইনারকে ফর্ম হিসেবে ডিফাইন করা হলো যাতে সাবমিট ইন্টারসেপ্ট প্রপারলি হয় */
               <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 
-                {/* Left Column: Delivery & Payment Information */}
+                {/* Left Column: Delivery Info */}
                 <div className="lg:col-span-7 bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 space-y-6">
                   <h3 className="font-serif text-lg font-bold text-zinc-900 flex items-center gap-2 border-b border-gray-100 pb-3">
                     <Truck className="w-5 h-5 text-emerald-700" /> Delivery Information
@@ -159,7 +156,7 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                     </select>
                   </div>
 
-                  {/* Payment Method Selector */}
+                  {/* Payment Method Group */}
                   <div className="flex flex-col gap-3 pt-2">
                     <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Select Payment Method</label>
                     
@@ -189,7 +186,7 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                       </label>
                     </div>
 
-                    {/* MFS Dynamic Fields */}
+                    {/* MFS Input Fields */}
                     {paymentMethod !== 'cod' && (
                       <div className="mt-3 bg-zinc-50 border border-gray-200 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-300">
                         <div className="flex flex-col gap-1.5">
@@ -212,7 +209,7 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                   </div>
                 </div>
 
-                {/* Right Column: Order Summary & True Form Submit Button */}
+                {/* Right Column: Order Summary */}
                 <div className="lg:col-span-5 bg-gray-50 border border-gray-200 rounded-2xl p-6 space-y-5">
                   <h3 className="font-serif text-lg font-bold text-zinc-900 border-b border-gray-200 pb-3">Order Summary</h3>
                   <div className="max-h-60 overflow-y-auto space-y-3 pr-1">
@@ -233,7 +230,6 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                     <div className="flex justify-between text-zinc-900 font-black text-sm pt-2 border-t border-dashed border-gray-200 mt-2"><span>Total Payable</span><span className="text-emerald-700">{grandTotal} BDT</span></div>
                   </div>
                   
-                  {/* 🌟 এই বাটনটি এখন ফর্ম সাবমিশন লজিককে শতভাগ ট্রিগার করতে বাধ্য করবে */}
                   <button 
                     disabled={isSubmitting}
                     type="submit" 

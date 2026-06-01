@@ -9,9 +9,9 @@ export default function Navbar({ cartItemsCount, onCartOpen, searchQuery, setSea
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-3xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between gap-4">
         
-        {/* Brand Logo */}
+        {/* Brand Logo - একদম অরিজিনাল ও সেফ স্ট্রাকচারে ফিরিয়ে আনা হলো */}
         <Link to="/" className="flex items-center space-x-3 shrink-0">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center border border-emerald-100">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center border border-emerald-100 shrink-0">
             <span className="font-serif text-emerald-800 font-black text-xl">D</span>
           </div>
           <div className="hidden sm:block">
@@ -43,7 +43,7 @@ export default function Navbar({ cartItemsCount, onCartOpen, searchQuery, setSea
             <Link to="/about" className="hover:text-emerald-700 transition-colors">Our Story</Link>
           </div>
 
-          {/* Shopping Cart Icon Trigger with Dynamic Badge Counter */}
+          {/* Shopping Cart Icon Trigger */}
           <button
             onClick={onCartOpen}
             type="button"
@@ -51,7 +51,6 @@ export default function Navbar({ cartItemsCount, onCartOpen, searchQuery, setSea
           >
             <ShoppingCart className="w-5 h-5 group-hover:text-emerald-700 transition-colors" />
             
-            {/* এই যে ভাই! এখানে bg-emerald-600 এবং text-white একদম হার্ডকোড করে দেওয়া হলো যেন যেকোনো থিমেই স্পষ্ট সবুজ গোল্লার ভেতর সাদা নম্বর দেখা যায় */}
             {cartItemsCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-emerald-600 text-white font-sans font-black text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white shadow-md z-50">
                 {cartItemsCount}
