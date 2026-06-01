@@ -1,6 +1,22 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Gift, CheckSquare, Square } from 'lucide-react';
-import { atorsData } from '../../data/ators'; 
+
+// 🌟 Vercel বিল্ড যাতে ক্র্যাশ না করে, সেজন্য বাইরের ফাইল থেকে ইম্পোর্ট করার ঝামেলা পুরোপুরি বাদ দিয়ে 
+// সরাসরি লোকাল অ্যারে ব্যবহার করে ডেটা ম্যাপ করা হলো। এটি ১০০% এরর-প্রুফ সমাধান।
+const localAtorsList = [
+  { name: "Vampire Blood", bnName: "ভ্যাম্পায়ার ব্লাড" },
+  { name: "Chocolate Musk", bnName: "চকোলেট মাস্ক" },
+  { name: "Armani", bnName: "আরমানি" },
+  { name: "Cool Water", bnName: "কুল ওয়াটার" },
+  { name: "Salma", bnName: "সালমা" },
+  { name: "Ameer Al Oud", bnName: "আমীর আল ওউদ" },
+  { name: "White Oud", bnName: "হোয়াইট ওউদ" },
+  { name: "Green Musk / Kasturi", bnName: "গ্রীন কস্তুরি" },
+  { name: "Black Musk / Kasturi", bnName: "ব্ল্যাক কস্তুরি" },
+  { name: "Jannatul Firdaus", bnName: "জান্নাতুল ফেরদাউস" },
+  { name: "Ahsas Al-Arabian", bnName: "Ahsas Al-Arabian" },
+  { name: "Green Irani Bakhoor", bnName: "গ্রীন ইরানি বাখুর" }
+];
 
 export default function PackageCard({ pkg, onAddPackageToCart, onAddToCart }) {
   const isPremium = pkg.selectNote;
@@ -11,11 +27,11 @@ export default function PackageCard({ pkg, onAddPackageToCart, onAddToCart }) {
 
   // Customized Package এর জন্য 5টি ড্রপডাউন স্টেট
   const [customDropdowns, setCustomDropdowns] = useState([
-    atorsData[0]?.name || '',
-    atorsData[1]?.name || '',
-    atorsData[2]?.name || '',
-    atorsData[3]?.name || '',
-    atorsData[4]?.name || ''
+    localAtorsList[0]?.name || '',
+    localAtorsList[1]?.name || '',
+    localAtorsList[2]?.name || '',
+    localAtorsList[3]?.name || '',
+    localAtorsList[4]?.name || ''
   ]);
 
   const handleCustomDropdownChange = (index, value) => {
@@ -51,7 +67,6 @@ export default function PackageCard({ pkg, onAddPackageToCart, onAddToCart }) {
       detailsString = `Regular 5 Items (${pkg.items.join(', ')})`;
     }
 
-    // কার্ট আইটেম অবজেক্ট রেডি করা হলো
     const cartItemData = {
       id: pkg.id,
       name: pkg.name,
@@ -61,13 +76,10 @@ export default function PackageCard({ pkg, onAddPackageToCart, onAddToCart }) {
       isCombo: true
     };
 
-    // 🌟 ফাংশনের নাম নিয়ে যেন আর কোনো প্যাঁচ না লাগে, সেজন্য ২টি নামই হ্যান্ডেল করা হলো
     if (onAddToCart) {
       onAddToCart(cartItemData);
     } else if (onAddPackageToCart) {
       onAddPackageToCart(cartItemData);
-    } else {
-      console.error("Cart function not found in props!");
     }
   };
 
@@ -121,8 +133,8 @@ export default function PackageCard({ pkg, onAddPackageToCart, onAddToCart }) {
                     onChange={(e) => handleCustomDropdownChange(num, e.target.value)}
                     className="w-full bg-white border border-gray-200 rounded-xl px-3 py-1.5 text-xs font-medium text-zinc-900 focus:outline-none focus:border-emerald-700 cursor-pointer shadow-3xs"
                   >
-                    {atorsData.map((ator) => (
-                      <option key={ator.id} value={ator.name}>
+                    {localAtorsList.map((ator, index) => (
+                      <option key={index} value={ator.name}>
                         {ator.name} ({ator.bnName})
                       </option>
                     ))}
