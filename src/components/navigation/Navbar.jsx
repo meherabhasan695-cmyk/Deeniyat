@@ -9,13 +9,15 @@ export default function Navbar({ cartItemsCount, onCartOpen, searchQuery, setSea
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-3xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between gap-4">
         
-        {/* Brand Logo - একদম অরিজিনাল ও সেফ স্ট্রাকচারে ফিরিয়ে আনা হলো */}
-        <Link to="/" className="flex items-center space-x-3 shrink-0">
+        {/* Brand Logo - 🌟 মোবাইল ও পিসি সব স্ক্রিনেই লোগো + টেক্সট একসাথে লক করে দেওয়া হলো */}
+        <Link to="/" className="flex items-center space-x-3 shrink-0 select-none">
+          {/* লোগো আইকন (D) */}
           <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center border border-emerald-100 shrink-0">
             <span className="font-serif text-emerald-800 font-black text-xl">D</span>
           </div>
-          <div className="hidden sm:block">
-            <span className="font-serif text-lg font-black tracking-wider text-zinc-900 block leading-tight">DEENIYAT</span>
+          {/* ব্র্যান্ড নেম টেক্সট (এবার সবসময় শো করবে) */}
+          <div className="flex flex-col text-left">
+            <span className="font-serif text-base sm:text-lg font-black tracking-wider text-zinc-900 block leading-tight">DEENIYAT</span>
             <span className="font-sans text-[9px] uppercase tracking-widest text-emerald-700 font-bold block mt-0.5">Essence</span>
           </div>
         </Link>
