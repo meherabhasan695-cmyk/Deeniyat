@@ -37,23 +37,24 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // ডিফল্ট পেজ রিফ্রেশ বন্ধ করা হলো
     
+    // ফর্ম ডেটা ভ্যালিডেশন
     if (!formData.name || !formData.phone || !formData.address) {
-      alert('ভাই, দয়া করে নাম, মোবাইল নাম্বার এবং সম্পূর্ণ ঠিকানাটি লিখুন।');
+      alert('ভাই, দয়া করে নাম, মোবাইল নাম্বার এবং সম্পূর্ণ ঠিকানাটি লিখুন।');
       return;
     }
 
     if (paymentMethod !== 'cod') {
       if (!formData.senderNumber || !formData.transactionId) {
-        alert('ভাই, দয়া করে যে নম্বর থেকে টাকা পাঠিয়েছেন সেটি এবং ট্রানজেকশন আইডি (TxID) লিখুন।');
+        alert('ভাই, দয়া করে যে নম্বর থেকে টাকা পাঠিয়েছেন সেটি এবং ট্রানজেকশন আইডি (TxID) লিখুন।');
         return;
       }
     }
 
     setIsSubmitting(true);
 
-    // 🌟 এখানে আপনার জেনারেট করা গুগল অ্যাপ স্ক্রিপ্ট ওয়েব অ্যাপ ইউআরএল-টি বসিয়ে দিন ভাই
+    // 🌟 মেহরাব ভাই, এখানে আপনার জেনারেট করা গুগল অ্যাপ স্ক্রিপ্ট ওয়েব অ্যাপ ইউআরএল-টি বসিয়ে দিন
     const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APP_SCRIPT_WEB_APP_URL_HERE"; 
 
     const orderData = {
@@ -71,11 +72,14 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
     };
 
     try {
+      // ইউআরএল প্লেসহোল্ডার চেঞ্জ করা হলেই কেবল fetch রিকোয়েস্ট পাঠাবে
       if (GOOGLE_SCRIPT_URL !== "YOUR_GOOGLE_APP_SCRIPT_WEB_APP_URL_HERE") {
         await fetch(GOOGLE_SCRIPT_URL, {
           method: 'POST',
-          mode: 'no-cors', 
-          headers: { 'Content-Type': 'application/json' },
+          mode: 'no-cors', // CORS ব্লক এড়ানোর জন্য সেফ মোড
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify(orderData)
         });
       }
@@ -84,7 +88,7 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
       if (onClearCart) onClearCart();
     } catch (error) {
       console.error("Google Sheet Submission Error: ", error);
-      alert("অর্ডার ডাটাবেজে সেভ করতে কিছুটা সমস্যা হয়েছে ভাই, তবে অর্ডারটি প্লেস করা হচ্ছে।");
+      alert("অর্ডার ডাটাবেজে সেভ করতে কিছুটা সমস্যা হয়েছে ভাই, তবে অর্ডারটি প্লেস করা হচ্ছে।");
       setIsOrdered(true);
       if (onClearCart) onClearCart();
     } finally {
@@ -102,11 +106,11 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
             <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-100">
               <ShieldCheck className="w-8 h-8" />
             </div>
-            <h2 className="font-serif text-2xl font-bold text-zinc-900">অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে!</h2>
+            <h2 className="font-serif text-2xl font-bold text-zinc-900">অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে!</h2>
             <p className="text-sm text-zinc-600 leading-relaxed max-w-sm mx-auto">
-              অর্ডারটি কনফার্ম হয়েছে মেহরাব ভাই! অর্ডারের সমস্ত বিবরণ আপনার গুগল শিটে অটোমেটিক সেভ হয়ে গেছে। আমরা খুব দ্রুত কাস্টমারের সাথে যোগাযোগ করব। ইনশাআল্লাহ্‌! 🎉
+              অর্ডারটি কনফার্ম হয়েছে মেহরাব ভাই! অর্ডারের সমস্ত বিবরণ আপনার গুগল শিটে অটোমেটিক সেভ হয়ে গেছে। আমরা খুব দ্রুত কাস্টমারের সাথে যোগাযোগ করব। ইনশাআল্লাহ্‌! 🎉
             </p>
-            <button onClick={() => navigate('/')} className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs uppercase tracking-widest px-6 py-3 rounded-xl transition-all cursor-pointer">
+            <button type="button" onClick={() => navigate('/')} className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs uppercase tracking-widest px-6 py-3 rounded-xl transition-all cursor-pointer">
               Back to Shopping
             </button>
           </div>
@@ -117,15 +121,15 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
               <div className="text-center py-16 bg-gray-50 rounded-2xl border border-gray-200 max-w-md mx-auto space-y-4">
                 <ShoppingBag className="w-12 h-12 text-gray-400 mx-auto" />
                 <p className="text-sm text-zinc-600 font-bold">আপনার কার্টটি বর্তমানে খালি ভাই!</p>
-                <button onClick={() => navigate('/')} className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs uppercase tracking-widest px-5 py-2.5 rounded-lg transition-all cursor-pointer">
+                <button type="button" onClick={() => navigate('/')} className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs uppercase tracking-widest px-5 py-2.5 rounded-lg transition-all cursor-pointer">
                   Shop Now
                 </button>
               </div>
             ) : (
-              // 🌟 পুরো গ্রিডটাকে ফর্ম ট্যাগ দিয়ে র্যাপ করা হলো যাতে ডানপাশের মেইন সাবমিট বাটনটি ক্লিক করলে ফর্ম ট্রিগার হয়
+              /* 🌟 HTML স্ট্যান্ডার্ড মেনে সম্পূর্ণ কন্টেইনারকে ফর্ম হিসেবে ডিফাইন করা হলো যাতে সাবমিট ইন্টারসেপ্ট প্রপারলি হয় */
               <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 
-                {/* Left Column: Form Info */}
+                {/* Left Column: Delivery & Payment Information */}
                 <div className="lg:col-span-7 bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 space-y-6">
                   <h3 className="font-serif text-lg font-bold text-zinc-900 flex items-center gap-2 border-b border-gray-100 pb-3">
                     <Truck className="w-5 h-5 text-emerald-700" /> Delivery Information
@@ -155,7 +159,7 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                     </select>
                   </div>
 
-                  {/* Payment Method Group */}
+                  {/* Payment Method Selector */}
                   <div className="flex flex-col gap-3 pt-2">
                     <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Select Payment Method</label>
                     
@@ -164,7 +168,7 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                         <input type="radio" name="payment" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} className="accent-emerald-700 cursor-pointer" />
                         <div className="text-xs">
                           <span className="block font-bold text-zinc-900">Cash On Delivery</span>
-                          <span className="block text-[9px] text-zinc-500 mt-0.5">হাতে পেয়ে টাকা দেবেন</span>
+                          <span className="block text-[9px] text-zinc-500 mt-0.5">হাতে পেয়ে টাকা দেবেন</span>
                         </div>
                       </label>
 
@@ -185,18 +189,18 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                       </label>
                     </div>
 
-                    {/* bKash/Nagad Fields */}
+                    {/* MFS Dynamic Fields */}
                     {paymentMethod !== 'cod' && (
                       <div className="mt-3 bg-zinc-50 border border-gray-200 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-300">
                         <div className="flex flex-col gap-1.5">
                           <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">
-                            {paymentMethod === 'bkash' ? 'bKash Number' : 'Nagad Number'} (যেখান থেকে টাকা পাঠিয়েছেন)
+                            {paymentMethod === 'bkash' ? 'bKash Number' : 'Nagad Number'} (যেখান থেকে টাকা পাঠিয়েছেন)
                           </label>
-                          <input type="tel" name="senderNumber" value={formData.senderNumber} onChange={handleInputChange} placeholder="01XXXXXXXXX" className="bg-white border border-gray-300 rounded-xl px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-medium" required />
+                          <input type="tel" name="senderNumber" value={formData.senderNumber} onChange={handleInputChange} placeholder="01XXXXXXXXX" className="bg-white border border-gray-300 rounded-xl px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-medium" required={paymentMethod !== 'cod'} />
                         </div>
                         <div className="flex flex-col gap-1.5">
                           <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Transaction ID (TxID)</label>
-                          <input type="text" name="transactionId" value={formData.transactionId} onChange={handleInputChange} placeholder="Example: 8N348EF97" className="bg-white border border-gray-300 rounded-xl px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-mono font-medium" required />
+                          <input type="text" name="transactionId" value={formData.transactionId} onChange={handleInputChange} placeholder="Example: 8N348EF97" className="bg-white border border-gray-300 rounded-xl px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-mono font-medium" required={paymentMethod !== 'cod'} />
                         </div>
                       </div>
                     )}
@@ -208,7 +212,7 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                   </div>
                 </div>
 
-                {/* Right Column: Order Summary */}
+                {/* Right Column: Order Summary & True Form Submit Button */}
                 <div className="lg:col-span-5 bg-gray-50 border border-gray-200 rounded-2xl p-6 space-y-5">
                   <h3 className="font-serif text-lg font-bold text-zinc-900 border-b border-gray-200 pb-3">Order Summary</h3>
                   <div className="max-h-60 overflow-y-auto space-y-3 pr-1">
@@ -222,13 +226,14 @@ export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart 
                       </div>
                     ))}
                   </div>
+                  
                   <div className="space-y-2 pt-2 border-t border-gray-200 text-xs text-zinc-700">
                     <div className="flex justify-between"><span>Subtotal</span><span className="font-semibold text-zinc-900">{totalAmount} BDT</span></div>
                     <div className="flex justify-between"><span>Delivery Charge</span><span className="font-semibold text-zinc-900">+{deliveryCharge} BDT</span></div>
                     <div className="flex justify-between text-zinc-900 font-black text-sm pt-2 border-t border-dashed border-gray-200 mt-2"><span>Total Payable</span><span className="text-emerald-700">{grandTotal} BDT</span></div>
                   </div>
                   
-                  {/* 🌟 এই বাটনের টাইপ এখন প্রপারলি type="submit" করে দেওয়া হলো যাতে রিয়াল-টাইমে handleSubmit ট্রিগার হয় */}
+                  {/* 🌟 এই বাটনটি এখন ফর্ম সাবমিশন লজিককে শতভাগ ট্রিগার করতে বাধ্য করবে */}
                   <button 
                     disabled={isSubmitting}
                     type="submit" 
