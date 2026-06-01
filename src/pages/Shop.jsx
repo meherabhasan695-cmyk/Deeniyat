@@ -1,24 +1,24 @@
 import React from 'react';
 import ProductCard from '../components/products/ProductCard';
 import PackageCard from '../components/packages/PackageCard';
-// 🌟 এখানে বানান 'attars' নিশ্চিত করা হলো যাতে বিল্ড এরর না আসে
-import { attars, comboPackages } from '../data/ators'; 
+// 🌟 আপনার ডাটা ফাইলের অরিজিনাল 'atorsData' এবং 'comboPackages' ইম্পোর্ট করা হলো
+import { atorsData, comboPackages } from '../data/ators'; 
 
 export default function Shop({ onAddToCart, searchQuery = '' }) {
   const query = searchQuery.toLowerCase().trim();
 
-  // ১. আতর ফিল্টারিং লজিক (attars অ্যারে ব্যবহার করে)
-  const filteredAtors = attars.filter(ator => {
+  // ১. আতর ফিল্টারিং লজিক (atorsData অ্যারে ব্যবহার করে)
+  const filteredAtors = atorsData ? atorsData.filter(ator => {
     return (
       ator.name.toLowerCase().includes(query) ||
       (ator.bnName && ator.bnName.toLowerCase().includes(query)) ||
       (ator.specialityEn && ator.specialityEn.toLowerCase().includes(query)) ||
       (ator.type && ator.type.toLowerCase().includes(query))
     );
-  });
+  }) : [];
 
   // ২. কম্বো প্যাকেজ ফিল্টারিং লজিক
-  const filteredPackages = comboPackages.filter(pkg => {
+  const filteredPackages = comboPackages ? comboPackages.filter(pkg => {
     return (
       pkg.name.toLowerCase().includes(query) ||
       (pkg.bnName && pkg.bnName.toLowerCase().includes(query)) ||
@@ -26,7 +26,7 @@ export default function Shop({ onAddToCart, searchQuery = '' }) {
       'combo'.includes(query) ||
       'set'.includes(query)
     );
-  });
+  }) : [];
 
   const hasResults = filteredAtors.length > 0 || filteredPackages.length > 0;
 
