@@ -8,6 +8,7 @@ import Packages from './pages/Packages';
 import About from './pages/About';
 import Checkout from './pages/Checkout';
 
+// মূল লেআউট র্যাপার
 function Layout({ cart, setCart, isCartOpen, setIsCartOpen, searchQuery, setSearchQuery, children }) {
   return (
     <div className="bg-brand-light min-h-screen flex flex-col">
@@ -26,11 +27,13 @@ function Layout({ cart, setCart, isCartOpen, setIsCartOpen, searchQuery, setSear
         onClose={() => setIsCartOpen(false)}
         cartItems={cart}
         onRemoveItem={(i) => setCart(cart.filter((_, idx) => idx !== i))}
+        onCheckoutClick={() => { setIsCartOpen(false); }} // সাইডবার ক্লোজ করে চেকআউটে যাওয়ার জন্য নিরাপদ ট্র্রিগার
       />
     </div>
   );
 }
 
+// আলাদা চেকআউট পেজ র্যাপার
 function CheckoutPage({ cart, setCart }) {
   const navigate = useNavigate();
   return (
@@ -66,26 +69,35 @@ export default function App() {
 
   return (
     <Routes>
+      {/* Home Route: আতর শপ কালেকশন দেখাবে */}
       <Route path="/" element={
         <Layout {...layoutProps}>
           <Shop onAddToCart={handleAddToCart} searchQuery={searchQuery} />
         </Layout>
       } />
+      
+      {/* Shop Route */}
       <Route path="/shop" element={
         <Layout {...layoutProps}>
           <Shop onAddToCart={handleAddToCart} searchQuery={searchQuery} />
         </Layout>
       } />
+      
+      {/* Packages Route: এখন এই পেজেও আপনাদের মেইন সার্চ কুয়েরি পাস করে দেওয়া হলো, যেন প্যাকেজও সার্চ বারের মাধ্যমে ডাইনামিকালি ফিল্টার হতে পারে */}
       <Route path="/packages" element={
         <Layout {...layoutProps}>
-          <Packages onAddToCart={handleAddToCart} />
+          <Packages onAddToCart={handleAddToCart} searchQuery={searchQuery} />
         </Layout>
       } />
+      
+      {/* About Route */}
       <Route path="/about" element={
         <Layout {...layoutProps}>
           <About />
         </Layout>
       } />
+      
+      {/* Checkout Route */}
       <Route path="/checkout" element={
         <CheckoutPage cart={cart} setCart={setCart} />
       } />

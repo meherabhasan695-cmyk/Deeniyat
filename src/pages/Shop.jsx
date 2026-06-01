@@ -15,7 +15,7 @@ export default function Shop({ onAddToCart, searchQuery }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-8 py-12">
       <h2 className="font-serif text-3xl font-bold text-brand-primary mb-2 border-b border-gray-200/60 pb-3">
-        Premium Ators Collection
+        Premium Attar Collection
       </h2>
       {filteredAtors.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
