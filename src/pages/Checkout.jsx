@@ -1,292 +1,151 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ShoppingBag, Truck, CreditCard, ShieldCheck } from 'lucide-react';
+import Navbar from '../components/navigation/Navbar';
+import Footer from '../components/layout/Footer';
 
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzXd27xJnsC2U8bpEntjCquJxpbVQ7CfVnD64RhvmeiUbrNbOB4C3VJ9xqRCTSfD3NQ2g/exec';
+export default function Checkout({ cartItems = [], totalAmount = 0, onClearCart }) {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    address: '',
+    city: 'dhaka',
+    notes: ''
+  });
+  const [isOrdered, setIsOrdered] = useState(false);
 
-export default function Checkout({ cartItems, onBackToShop, onOrderSuccess }) {
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('cod');
-  const [shippingLocation, setShippingLocation] = useState('inside');
-  const [senderNumber, setSenderNumber] = useState('');
-  const [trxId, setTrxId] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const deliveryCharge = formData.city === 'dhaka' ? 60 : 120;
+  const grandTotal = totalAmount + deliveryCharge;
 
-  const itemsTotal = cartItems.reduce((total, item) => total + (item.finalPrice || item.price), 0);
-  const shippingCharge = shippingLocation === 'inside' ? 40 : 80;
-  const totalAmount = itemsTotal + shippingCharge;
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
 
-  const handleSubmitOrder = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (paymentMethod !== 'cod' && (!senderNumber || !trxId)) {
-      alert('Please fill up your payment number and Transaction ID!');
+    if (!formData.name || !formData.phone || !formData.address) {
+      alert('ভাই, দয়া করে নাম, মোবাইল নাম্বার এবং সম্পূর্ণ ঠিকানাটি লিখুন।');
       return;
     }
-
-    setIsSubmitting(true);
-
-    const orderData = {
-      name: fullName,
-      phone: phone,
-      address: address,
-      location: shippingLocation === 'inside' ? 'Inside Dhaka' : 'Outside Dhaka',
-      items: cartItems.map(item => `${item.name} (${item.finalPrice || item.price} BDT)`).join(', '),
-      subtotal: itemsTotal,
-      delivery: shippingCharge,
-      total: totalAmount,
-      paymentMethod: paymentMethod === 'cod' ? 'Cash on Delivery' : paymentMethod === 'bkash' ? 'bKash' : 'Nagad',
-      senderNumber: senderNumber || '-',
-      trxId: trxId || '-',
-    };
-
-    try {
-      await fetch(SHEET_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData),
-      });
-    } catch (err) {
-      console.error('Sheet save error:', err);
-    }
-
-    setIsSubmitting(false);
-    alert('Alhamdulillah! তোমার অর্ডার সফলভাবে জমা হয়েছে! 🌟');
-    onOrderSuccess();
+    setIsOrdered(true);
+    if (onClearCart) onClearCart();
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 font-sans">
-      <button
-        onClick={onBackToShop}
-        className="flex items-center space-x-1.5 text-xs text-gray-500 hover:text-brand-accent transition-colors mb-6 font-medium"
-      >
-        <span>← Back to Shop</span>
-      </button>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-        {/* Left: Form */}
-        <div className="lg:col-span-2 bg-white border border-gray-100 rounded-xl p-6 shadow-xs space-y-6">
-          <h2 className="font-serif text-2xl font-bold text-brand-dark border-b border-gray-100 pb-3">
-            Shipping & Payment
-          </h2>
-
-          <form onSubmit={handleSubmitOrder} className="space-y-5">
-
-            {/* Full Name */}
-            <div className="space-y-1">
-              <label className="block text-[10px] uppercase tracking-widest font-bold text-gray-400">Full Name</label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Enter your full name"
-                className="w-full bg-gray-50/50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary focus:bg-white transition-all text-brand-dark"
-                required
-              />
+    <div className="bg-white min-h-screen flex flex-col font-sans text-zinc-850">
+      <Navbar cartItemsCount={cartItems.length} onCartOpen={() => {}} searchQuery="" setSearchQuery={() => {}} />
+      
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-8 py-12">
+        {isOrdered ? (
+          <div className="max-w-xl mx-auto py-16 text-center space-y-6">
+            <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-100">
+              <ShieldCheck className="w-8 h-8" />
             </div>
-
-            {/* Phone Number */}
-            <div className="space-y-1">
-              <label className="block text-[10px] uppercase tracking-widest font-bold text-gray-400">Phone Number</label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="01XXXXXXXXX"
-                className="w-full bg-gray-50/50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary focus:bg-white transition-all text-brand-dark"
-                required
-              />
-            </div>
-
-            {/* Delivery Location */}
-            <div className="space-y-2">
-              <label className="block text-[10px] uppercase tracking-widest font-bold text-gray-400">Delivery Location</label>
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  type="button"
-                  onClick={() => setShippingLocation('inside')}
-                  className={`border rounded-lg p-3 text-xs font-semibold tracking-wide transition-all flex flex-col items-center justify-center gap-1 ${
-                    shippingLocation === 'inside'
-                      ? 'border-brand-primary bg-brand-light/30 text-brand-primary shadow-2xs'
-                      : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                  }`}
+            <h2 className="font-serif text-2xl font-bold text-zinc-900">অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে!</h2>
+            <p className="text-sm text-zinc-600 leading-relaxed max-w-sm mx-auto">
+              অর্ডার কনফার্ম হয়েছে ভাই! খুব দ্রুত কল দিয়ে ভেরিফাই করা হবে।
+            </p>
+            <button 
+              onClick={() => navigate('/')} 
+              className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs uppercase tracking-widest px-6 py-3 rounded-xl transition-all block mx-auto cursor-pointer"
+            >
+              Back to Shopping
+            </button>
+          </div>
+        ) : (
+          <>
+            <h2 className="font-serif text-3xl font-bold text-zinc-900 mb-8 border-b border-gray-200 pb-3">Checkout</h2>
+            {cartItems.length === 0 ? (
+              <div className="text-center py-16 bg-zinc-50 rounded-2xl border border-gray-100 max-w-md mx-auto space-y-4">
+                <ShoppingBag className="w-12 h-12 text-gray-400 mx-auto" />
+                <p className="text-sm text-zinc-600">আপনার কার্টটি খালি ভাই!</p>
+                <button 
+                  onClick={() => navigate('/')} 
+                  className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs uppercase tracking-widest px-5 py-2.5 rounded-lg transition-all cursor-pointer inline-block"
                 >
-                  <span className="text-sm">📍 Inside Dhaka</span>
-                  <span className="text-[10px] opacity-80">40 BDT</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShippingLocation('outside')}
-                  className={`border rounded-lg p-3 text-xs font-semibold tracking-wide transition-all flex flex-col items-center justify-center gap-1 ${
-                    shippingLocation === 'outside'
-                      ? 'border-brand-primary bg-brand-light/30 text-brand-primary shadow-2xs'
-                      : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
-                  <span className="text-sm">🚚 Outside Dhaka</span>
-                  <span className="text-[10px] opacity-80">80 BDT</span>
+                  Shop Now
                 </button>
               </div>
-            </div>
-
-            {/* Delivery Address */}
-            <div className="space-y-1">
-              <label className="block text-[10px] uppercase tracking-widest font-bold text-gray-400">Delivery Address</label>
-              <textarea
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Enter your full delivery address"
-                rows="3"
-                className="w-full bg-gray-50/50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary focus:bg-white transition-all text-brand-dark"
-                required
-              />
-            </div>
-
-            {/* Payment Method */}
-            <div className="space-y-2">
-              <label className="block text-[10px] uppercase tracking-widest font-bold text-gray-400">Payment Method</label>
-              <div className="grid grid-cols-3 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('cod')}
-                  className={`border rounded-lg p-3 text-xs font-semibold tracking-wide transition-all ${
-                    paymentMethod === 'cod'
-                      ? 'border-brand-primary bg-brand-light/30 text-brand-primary shadow-2xs'
-                      : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
-                  Cash on Delivery
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('bkash')}
-                  className={`border rounded-lg p-3 text-xs font-semibold tracking-wide transition-all ${
-                    paymentMethod === 'bkash'
-                      ? 'border-pink-500 bg-pink-50/30 text-pink-600 shadow-2xs'
-                      : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
-                  bKash
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('nagad')}
-                  className={`border rounded-lg p-3 text-xs font-semibold tracking-wide transition-all ${
-                    paymentMethod === 'nagad'
-                      ? 'border-orange-500 bg-orange-50/30 text-orange-600 shadow-2xs'
-                      : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
-                  Nagad
-                </button>
-              </div>
-            </div>
-
-            {/* MFS Payment Box */}
-            {paymentMethod !== 'cod' && (
-              <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 space-y-3 text-xs text-gray-600 shadow-2xs">
-                <p className="leading-relaxed">
-                  📱 Please{' '}
-                  <span className="font-bold text-brand-accent uppercase tracking-wider">Send Money</span>{' '}
-                  to:{' '}
-                  <span className="font-extrabold text-brand-primary text-sm bg-white border border-blue-100 px-2 py-0.5 rounded shadow-3xs">
-                    {paymentMethod === 'bkash' ? '01711125777' : '01522123642'}
-                  </span>{' '}
-                  ({paymentMethod === 'bkash' ? 'bKash' : 'Nagad'} Personal). Then fill below:
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                  <div>
-                    <label className="block text-[9px] uppercase tracking-wider font-bold text-gray-400 mb-1">
-                      Your {paymentMethod === 'bkash' ? 'bKash' : 'Nagad'} Number
-                    </label>
-                    <input
-                      type="text"
-                      value={senderNumber}
-                      onChange={(e) => setSenderNumber(e.target.value)}
-                      placeholder="01XXXXXXXXX"
-                      className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand-primary font-medium"
-                      required
-                    />
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                {/* Delivery Form */}
+                <form onSubmit={handleSubmit} className="lg:col-span-7 bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 space-y-6">
+                  <h3 className="font-serif text-lg font-bold text-zinc-900 flex items-center gap-2 border-b border-gray-100 pb-3">
+                    <Truck className="w-5 h-5 text-emerald-700" /> Delivery Information
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Full Name</label>
+                      <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="কাস্টমারের নাম" className="bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-medium" required />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Phone Number</label>
+                      <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="01XXXXXXXXX" className="bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-medium" required />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-[9px] uppercase tracking-wider font-bold text-gray-400 mb-1">
-                      Transaction ID (TrxID)
-                    </label>
-                    <input
-                      type="text"
-                      value={trxId}
-                      onChange={(e) => setTrxId(e.target.value)}
-                      placeholder="e.g. 9X2JK8M0"
-                      className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand-primary font-medium"
-                      required
-                    />
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Full Address</label>
+                    <textarea name="address" value={formData.address} onChange={handleInputChange} rows="3" placeholder="বাসা নং, রোড নং, এলাকা এবং জেলা" className="bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-medium resize-none" required />
                   </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Region / City</label>
+                      <select name="city" value={formData.city} onChange={handleInputChange} className="bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-emerald-700 font-medium cursor-pointer">
+                        <option value="dhaka">Inside Dhaka (Dhaka City)</option>
+                        <option value="outside">Outside Dhaka (All over BD)</option>
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Payment Method</label>
+                      <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2.5 text-xs flex items-center gap-2 text-emerald-900 font-bold">
+                        <CreditCard className="w-4 h-4 text-emerald-700" /> Cash On Delivery (COD)
+                      </div>
+                    </div>
+                  </div>
+                </form>
+
+                {/* Order Summary */}
+                <div className="lg:col-span-5 bg-gray-50 border border-gray-200 rounded-2xl p-6 space-y-5">
+                  <h3 className="font-serif text-lg font-bold text-zinc-900 border-b border-gray-200 pb-3">Order Summary</h3>
+                  <div className="max-h-60 overflow-y-auto space-y-3 pr-1">
+                    {cartItems.map((item, idx) => (
+                      <div key={idx} className="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-200">
+                        <div className="min-w-0 flex-1 pr-2">
+                          <h4 className="font-serif text-xs font-bold text-zinc-900 truncate">{item.name}</h4>
+                          <p className="text-[10px] text-zinc-500 mt-0.5">{item.isCustom || item.items ? 'Combo Package' : `${item.selectedSize} | ${item.selectedBottle === 'premium' ? 'Premium' : 'Regular'}`}</p>
+                        </div>
+                        <span className="font-sans text-xs font-bold text-zinc-900 shrink-0">{item.finalPrice || item.price} BDT</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="space-y-2 pt-2 border-t border-gray-200 text-xs text-zinc-700">
+                    <div className="flex justify-between"><span>Subtotal</span><span className="font-semibold text-zinc-900">{totalAmount} BDT</span></div>
+                    <div className="flex justify-between"><span>Delivery Charge</span><span className="font-semibold text-zinc-900">+{deliveryCharge} BDT</span></div>
+                    <div className="flex justify-between text-zinc-900 font-black text-sm pt-2 border-t border-dashed border-gray-300 mt-2">
+                      <span>Total Payable</span>
+                      <span className="text-emerald-700">{grandTotal} BDT</span>
+                    </div>
+                  </div>
+                  
+                  {/* এখানে টেক্সটের কালার সরাসরি text-white নিশ্চিত করা হলো যেন বাটন সাদা না দেখায় */}
+                  <button 
+                    onClick={handleSubmit} 
+                    type="submit" 
+                    className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-sans font-bold text-xs uppercase tracking-widest py-4 rounded-xl transition-all shadow-md cursor-pointer block text-center"
+                  >
+                    Place Order ({grandTotal} BDT)
+                  </button>
                 </div>
+
               </div>
             )}
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-brand-primary hover:bg-brand-dark disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-widest py-3.5 rounded-lg transition-colors shadow-xs flex items-center justify-center gap-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                  </svg>
-                  Placing Order...
-                </>
-              ) : (
-                `Confirm Order (${totalAmount} BDT)`
-              )}
-            </button>
-
-          </form>
-        </div>
-
-        {/* Right: Order Summary */}
-        <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-xs h-fit space-y-4">
-          <h3 className="font-serif text-lg font-bold text-brand-dark border-b border-gray-100 pb-2">
-            Order Summary
-          </h3>
-          <div className="divide-y divide-gray-50 max-h-60 overflow-y-auto pr-1">
-            {cartItems.map((item, idx) => (
-              <div key={idx} className="flex justify-between items-center py-2.5 text-xs">
-                <div>
-                  <p className="font-bold text-gray-700">{item.name}</p>
-                  <p className="text-[10px] text-gray-400">
-                    {item.items ? 'Combo Set' : 'Premium Fragrance'}
-                  </p>
-                </div>
-                <span className="font-semibold text-brand-primary">
-                  {item.finalPrice || item.price} BDT
-                </span>
-              </div>
-            ))}
-          </div>
-          <div className="space-y-2 pt-3 border-t border-gray-100 text-xs">
-            <div className="flex justify-between text-gray-500">
-              <span>Subtotal:</span>
-              <span className="font-semibold text-gray-700">{itemsTotal} BDT</span>
-            </div>
-            <div className="flex justify-between text-gray-500">
-              <span>Delivery Charge:</span>
-              <span className="font-semibold text-gray-700">+{shippingCharge} BDT</span>
-            </div>
-          </div>
-          <div className="border-t border-gray-100 pt-3 flex justify-between items-center text-sm">
-            <span className="font-bold text-gray-600">Total Payable:</span>
-            <span className="font-extrabold text-lg text-brand-primary">{totalAmount} BDT</span>
-          </div>
-        </div>
-
-      </div>
+          </>
+        )}
+      </main>
+      <Footer />
     </div>
   );
 }
