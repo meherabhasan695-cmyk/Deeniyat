@@ -4,34 +4,36 @@ export default function ProductCard({ ator, onAddToCart }) {
   const [selectedSize, setSelectedSize] = useState('3ml');
   const [selectedBottle, setSelectedBottle] = useState('rollon');
 
-  // সাইজ অনুযায়ী প্রাইস বের করা
-  const currentPrice = ator.prices[selectedSize] || ator.price;
+  const currentPrice = ator.prices && ator.prices[selectedSize] ? ator.prices[selectedSize] : (ator.price || 0);
+  const bottleAdditionalPrice = selectedBottle === 'premium' ? 30 : 0; // এখানে +৩০ বিডিটি ফিক্স করা হলো ভাই
+  const finalPrice = currentPrice + bottleAdditionalPrice;
 
   const handleAdd = () => {
     onAddToCart({
       ...ator,
       selectedSize,
       selectedBottle,
-      finalPrice: currentPrice
+      finalPrice: finalPrice
     });
   };
 
   return (
-    <div className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col h-full">
-      {/* Product Image */}
-      <div className="relative pt-[100%] bg-gray-50 overflow-hidden">
-        <img 
-          src={ator.image} 
-          alt={ator.name} 
-          className="absolute inset-0 w-full h-full object-cover object-center hover:scale-105 transition-transform duration-300"
-        />
-        <span className="absolute top-2 right-2 bg-brand-dark/80 text-white text-[9px] font-bold px-2 py-0.5 rounded-md backdrop-blur-xs">
-          {ator.type}
-        </span>
-      </div>
+    <div className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between h-full min-h-[520px] p-4">
+      {/* Top Content Group */}
+      <div className="space-y-3">
+        {/* Product Image */}
+        <div className="relative pt-[100%] bg-gray-50 overflow-hidden rounded-lg">
+          <img 
+            src={ator.image} 
+            alt={ator.name} 
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+          <span className="absolute top-2 right-2 bg-brand-dark/80 text-white text-[9px] font-bold px-2 py-0.5 rounded-md">
+            {ator.type}
+          </span>
+        </div>
 
-      {/* Content Area */}
-      <div className="p-4 flex flex-col flex-grow space-y-3">
+        {/* Product Details */}
         <div>
           <h3 className="font-serif text-base font-bold text-brand-dark leading-tight">{ator.name}</h3>
           <p className="font-sans text-xs text-gray-400 mt-0.5">{ator.bnName}</p>
@@ -48,9 +50,9 @@ export default function ProductCard({ ator, onAddToCart }) {
             <select 
               value={selectedSize} 
               onChange={(e) => setSelectedSize(e.target.value)}
-              className="bg-gray-50 border border-gray-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-brand-primary text-gray-700 font-medium"
+              className="w-full bg-gray-50 border border-gray-200 rounded-md px-2 py-1.5 focus:outline-none text-gray-700 font-medium"
             >
-              {Object.keys(ator.prices).map(size => (
+              {ator.prices && Object.keys(ator.prices).map(size => (
                 <option key={size} value={size}>{size}</option>
               ))}
             </select>
@@ -61,26 +63,28 @@ export default function ProductCard({ ator, onAddToCart }) {
             <select 
               value={selectedBottle} 
               onChange={(e) => setSelectedBottle(e.target.value)}
-              className="bg-gray-50 border border-gray-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-brand-primary text-gray-700 font-medium"
+              className="w-full bg-gray-50 border border-gray-200 rounded-md px-2 py-1.5 focus:outline-none text-gray-700 font-medium"
             >
               <option value="rollon">Regular Roll-on (+0 BDT)</option>
-              <option value="premium">Premium Bottle (+50 BDT)</option>
+              <option value="premium">Premium Bottle (+30 BDT)</option>
             </select>
           </div>
         </div>
+      </div>
 
-        {/* Price & Action Button Row — এটি নিচে পুশ করার জন্য flex-grow এর পরে দেওয়া হয়েছে */}
-        <div className="pt-3 border-t border-gray-50 flex items-center justify-between mt-auto">
-          <div className="flex flex-col">
-            <span className="text-sm font-extrabold text-brand-primary">{currentPrice} BDT</span>
-          </div>
-          <button
-            onClick={handleAdd}
-            className="bg-brand-primary hover:bg-brand-dark text-white font-bold text-[10px] uppercase tracking-widest px-3 py-2 rounded-lg transition-colors shadow-3xs"
-          >
-            Add To Cart
-          </button>
+      {/* Bottom Price & Call to Action — এটিকে একদম নিচে ভিজিবল রাখার জন্য মার্জিন টপ অটো দেওয়া হয়েছে */}
+      <div className="pt-4 border-t border-gray-50 flex items-center justify-between mt-4">
+        <div className="flex flex-col">
+          <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Price</span>
+          <span className="text-sm font-extrabold text-brand-primary">{finalPrice} BDT</span>
         </div>
+        <button
+          onClick={handleAdd}
+          type="button"
+          className="bg-brand-primary hover:bg-brand-dark text-white font-bold text-[10px] uppercase tracking-widest px-4 py-2.5 rounded-lg transition-all shadow-sm active:scale-95 block visibility-visible cursor-pointer z-10"
+        >
+          Add To Cart
+        </button>
       </div>
     </div>
   );
