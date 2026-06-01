@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-primary: #0F3A20; /* Deep Emerald Green */
+  --color-brand-accent: #D4AF37;  /* Premium Gold */
+  --color-brand-light: #FDFBF7;   /* Soft Background */
+  --color-brand-dark: #1A1A1A;    /* Dark Slate */
+
+  --font-serif: "Cormorant Garamond", serif;
+  --font-sans: "Inter", sans-serif;
+}
